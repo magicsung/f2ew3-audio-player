@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/css/lib/normalize.css" media="screen" title="no title" charset="utf-8">
+  <link rel="stylesheet" href="/css/stream.css" media="screen" title="no title" charset="utf-8">
+  <title>w3 audio player</title>
+</head>
+
+<body>
+  <audio controls="controls" id="audio_player">
+    <source src="/tracks/1" type="audio/mpeg" />
+    Your browser does not support the audio element.
+  </audio>
+
+  <div id="audioplayer" style="border: 1px solid black">
+    <div class="jp-type-single">
+      <div class="jp-title">
+        <ul>
+          <li class="cover">
+            <img class="basic-image" src="/img/420x420.png" alt="" />
+            <img class="cover-image" src="/img/Cover.png" alt="" />
+            <div class="black-mask"></div>
+          </li>
+          <li class="title mt-25 mb-25 fz-1p2em">Title
+            <ul class="music-controls pause" id="play-button-group" onclick="playOrPause()">
+              <li><a class="play-button fas fa-play" tabindex="1"></a></li>
+              <li><a class="pause-button fas fa-pause" tabindex="1"></a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+      <div class="jp-gui jp-interface">
+
+        <div class="time-holder">
+          <div class="current-time">00:00</div>
+          <div class="duration" role="timer" aria-label="duration">00:00</div>
+        </div>
+        <div class="progress-bar">
+          <div class="buffered-bar"></div>
+          <div class="play-bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <script>
+    const music = document.getElementById('audio_player');
+    const playButtonGroup = document.getElementById('play-button-group');
+    const currentTimeDisplay = document.querySelector('.current-time');
+    const durationTimeDisplay = document.querySelector('.duration');
+    const bufferedBar = document.querySelector('.buffered-bar');
+    const playBar = document.querySelector('.play-bar');
+
+    // 下載進度
+    music.onprogress = e => {
+      const buffered = music.buffered.end(music.buffered.length - 1);
+      const bufferedPersent = `${buffered / music.duration * 100}%`;
+      bufferedBar.style.width = bufferedPersent;
+    }
+    // 播放中
+    music.ontimeupdate = e => {
+      currentTimeDisplay.innerHTML = formatDurationInSec(music.currentTime);
+      const currentPersent = `${music.currentTime / music.duration * 100}%`;;
+      playBar.style.width = currentPersent;
+    }
+    // 音樂資訊載入
+    music.onloadedmetadata = e => {
+      durationTimeDisplay.innerHTML = formatDurationInSec(music.duration);
+    }
+
+    // 控制播放＆暫停
+    function playOrPause() {
+      if (music.paused) {
+        music.play();
+        playButtonGroup.classList.remove('pause');
+        playButtonGroup.classList.add('play');
+      } else {
+        music.pause();
+        playButtonGroup.classList.remove('play');
+        playButtonGroup.classList.add('pause');
+      }
+    }
+    // 控制音量
+    function setVolume(volume) {
+      music.volume = volume;
+    }
+
+    function formatDurationInSec(sec) {
+      return moment.utc(moment.duration(sec, 'seconds').as('milliseconds')).format('mm:ss');
+    }
+  </script>
+</body>
+
+</html>

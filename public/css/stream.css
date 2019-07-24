@@ -1,0 +1,236 @@
+* { box-sizing: border-box; }
+a { text-decoration: none; }
+body { background-color: #eee; }
+.mt-25 { margin-top: 25px; }
+.pd-15 { padding: 15px; }
+.mb-25 { margin-bottom: 25px; }
+.mb-45 { margin-bottom: 45px; }
+.fz-1p2em { font-size: 1.2em; }
+
+#audio_player {
+  /* display: none; */
+}
+
+#audioplayer {
+  width: 420px;
+  max-width: 100%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate( -50%, -50% );
+  background-color: #000;
+  box-shadow: 0 20px 20px 0 #666;
+  border-radius: 10px;
+}
+@media screen and (max-width: 420px) {
+  #audioplayer {
+    left: 0;
+    top: 0;
+    transform: translate( 0, 0 );
+  }
+}
+
+
+.jp-title {
+  position: relative;
+}
+.logo > img {
+  display: none;
+  width: 100px;
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  z-index: 10;
+}
+.cover {
+  display: block;
+  position: relative;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  overflow: hidden;
+}
+.basic-image {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  width: 100%;
+}
+.cover-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.black-mask {
+  width: 100%;
+  height: 150px;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  background-color: #000;
+  -webkit-mask-image: -webkit-gradient(linear, left bottom, left top, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)))
+}
+.jp-title .title {
+  font-size: 2em;
+  color: #fff;
+  font-weight: 700;
+  margin-left: 25px;
+  position: relative;
+  top: -50px;
+}
+
+.jp-title ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.jp-gui {
+	background: #000;
+	/*overflow: hidden;*/
+  height: 60px;
+  position: relative;
+  top: -25px;
+  width: 100%;
+}
+
+.jp-jplayer,
+.jp-audio {
+  max-width: 100%;
+  width: 420px;
+  margin: 0 auto;
+}
+
+.music-controls {
+  position: relative;
+  float: right;
+  top: 5px;
+  right: 25px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  font-family: "FontAwesome";
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+}
+
+.music-controls li {
+  display: inline;
+}
+
+.music-controls a {
+  color: #fff;
+  font-size: .8em;
+  border-radius: 5px;
+}
+
+.play-button,
+.pause-button {
+  width: 60px;
+  height: 40px;
+  display: inline-block;
+  text-align: center;
+  line-height: 43px;
+}
+
+#play-button-group.play .play-button{
+  display: none;
+}
+#play-button-group.pause .pause-button{
+  display: none;
+}
+
+.jp-mute,
+.jp-unmute {
+  display: none;
+  position: absolute;
+  right: 55px;
+  top: 0;
+  width: 20px;
+  height: 40px;
+  display: inline-block;
+  line-height: 46px;
+}
+
+.jp-mute {
+  display: none;
+  text-align: left;
+}
+
+.jp-volume-bar {
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 17px;
+  width: 45px;
+  height: 8px;
+  border-radius: 20px 20px 20px 20px;
+  -webkit-box-shadow: 0 1px 1px 0 rgba(0,0,0,0.1) inset;
+  box-shadow: 0 1px 1px 0 rgba(0,0,0,0.1) inset;
+  background-color: #992E18;
+  overflow: hidden;
+}
+
+.jp-volume-bar-value {
+  display: none;
+  background-color: #fff;
+  height: 8px;
+  border-radius: 20px 20px 20px 20px;
+}
+
+.progress-bar {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 3px 3px 3px 3px;
+  overflow: hidden;
+  position: relative;
+  top: 0;
+  height: 3px;
+  width: calc( 100% - 50px );
+  margin: 0 25px;
+  -webkit-box-shadow: 0 1px 1px 0 rgba(0,0,0,0.2) inset;
+  box-shadow: 0 1px 1px 0 rgba(0,0,0,0.2) inset;
+}
+
+.progress-bar .buffered-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0;
+  background-color: rgba(0,0,0,.5);
+  border-radius: 3px 3px 3px 3px;
+}
+
+.progress-bar .play-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0;
+  background-color: #feffbd;
+  opacity: 0.5;
+  border-radius: 3px 3px 3px 3px;
+}
+
+.time-holder {
+  display: block;
+  color: #FFF;
+  font-size: 1em;
+  line-height: 14px;
+  width: 100%;
+  position: relative;
+  padding: 25px;
+  top: -6px;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+}
+.time-holder .current-time {
+  float: left;
+}
+.time-holder .duration {
+  float: right;
+  color: rgba(255, 255, 255, 0.3);
+}

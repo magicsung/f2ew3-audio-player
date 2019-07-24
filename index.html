@@ -4,17 +4,18 @@
     <meta charset="utf-8">
     <title>Day005 - Music Player</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
-    <link rel="stylesheet" href="./css/lib/normalize.css" media="screen" title="no title" charset="utf-8">
-    <link rel="stylesheet" href="./style.css" media="screen" title="no title" charset="utf-8">
-    <script type="text/javascript" src="./js/jquery-2.2.1.min.js"></script>
-	  <script type="text/javascript" src="./js/jquery.jplayer.min.js"></script>
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css"> -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/lib/normalize.css" media="screen" title="no title" charset="utf-8">
+    <link rel="stylesheet" href="/css/style.css" media="screen" title="no title" charset="utf-8">
+    <script type="text/javascript" src="/js/jquery-2.2.1.min.js"></script>
+	  <script type="text/javascript" src="/js/jquery.jplayer.min.js"></script>
     <script>
 	  $(document).ready(function(){
       $("#jquery_jplayer_1").jPlayer({
         ready: function () {
           $(this).jPlayer("setMedia", {
-            mp3: "./audio/Central_Park.mp3"
+            mp3: "/tracks/1"
           });
         },
         swfPath: "/js",
@@ -31,8 +32,8 @@
         <div class="jp-title">
           <ul>
             <li class="cover">
-              <img class="basic-image" src="./420x420.png" alt="" />
-              <img class="cover-image" src="./Cover.png" alt="" />
+              <img class="basic-image" src="/img/420x420.png" alt="" />
+              <img class="cover-image" src="/img/Cover.png" alt="" />
               <div class="black-mask"></div>
             </li>
             <li class="title mt-25 mb-25 fz-1p2em">Title
