@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css">
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.css"> -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="/css/lib/normalize.css" media="screen" title="no title" charset="utf-8">
   <link rel="stylesheet" href="/css/stream.css" media="screen" title="no title" charset="utf-8">
   <title>w3 audio player</title>
@@ -29,10 +30,10 @@
           <li class="title mt-25 fz-1p2em">
             <span id="music-title">Title</span>
             <div class="music-controls pause" id="play-button-group">
-              <span><a class="fa fa-step-backward mr-15 clickable" onclick="playPreviousMusic()"></a></span>
-              <span><a class="play-button fa fa-play clickable" onclick="playOrPause()"></a></span>
-              <span><a class="pause-button fa fa-pause clickable" onclick="playOrPause()"></a></span>
-              <span><a class="fa fa-step-forward ml-15 clickable" onclick="playNextMusic()"></a></span>
+              <span><i class="material-icons clickable mr-15" onclick="playNextMusic()">skip_previous</i></span>
+              <span><i class="material-icons clickable play-button" onclick="playOrPause()">play_arrow</i></span>
+              <span><i class="material-icons clickable pause-button" onclick="playOrPause()">pause</i></span>
+              <span><i class="material-icons clickable ml-15" onclick="playNextMusic()">skip_next</i></span>
             </div>
           </li>
         </ul>
@@ -46,6 +47,15 @@
           <div class="buffered-bar"></div>
           <div class="play-bar"></div>
         </div>
+      </div>
+      <div class="other-controls">
+        <i class="material-icons clickable pull-left" onclick="repeat(this)">repeat</i>
+        <span class="ml-15 up" id="volume-setting">
+          <i class="material-icons down">volume_down</i>
+          <input type="range" onchange="setVolume(this.value)" id="volume" min="0" max="1" value="1" step="0.01">
+          <i class="material-icons up">volume_up</i>
+        </span>
+        <i class="material-icons clickable pull-right" onclick="shuffle(this)">shuffle</i>
       </div>
     </div>
   </div>
@@ -68,7 +78,11 @@
     const playBar = $('.play-bar');
     const playList = $('#play-list');
     const playListArray = [];
-    let currentMusicIndex = 0;
+    const playInfo = {
+      currentMusicIndex: 0,
+      shouldRepeat: false,
+      shuffle: false,
+    };
 
     // 取得音樂列表
     axios.get('/tracks').then(function (res) {
@@ -77,8 +91,8 @@
       const listTemplate = res.data.map((item, index) => {
         const playPauseButton = `
           <span class="music-list-item play pull-right" id="music-${index}">
-            <span class="fa fa-play clickable" onclick="switchMusic(${index})"></span>
-            <span class="fa fa-pause clickable" onclick="playOrPause()"></span>
+            <i class="material-icons clickable play" onclick="switchMusic(${index})">play_arrow</i>
+            <i class="material-icons clickable pause" onclick="playOrPause()">pause</i>
           </span>
         `;
         return `<li>${index + 1}. ${item} ${playPauseButton}</li>`
@@ -87,26 +101,40 @@
       setMusicTitle(0);
     });
 
-    // 下載進度
-    music.onprogress = e => {
-      try {
-        const buffered = music.buffered.end(music.buffered.length - 1);
-        const bufferedPersent = `${buffered / music.duration * 100}%`;
-        bufferedBar.style.width = bufferedPersent; 
-      } catch (error) {
-        console.log(error);
+    // 音樂事件相關
+    (() => {
+      // 下載進度
+      music.onprogress = e => {
+        try {
+          const buffered = music.buffered.end(music.buffered.length - 1);
+          const bufferedPersent = `${buffered / music.duration * 100}%`;
+          bufferedBar.style.width = bufferedPersent; 
+        } catch (error) {
+          console.log(error);
+        }
       }
-    }
-    // 播放中
-    music.ontimeupdate = e => {
-      currentTimeDisplay.innerHTML = formatDurationInSec(music.currentTime);
-      const currentPersent = `${music.currentTime / music.duration * 100}%`;;
-      playBar.style.width = currentPersent;
-    }
-    // 音樂資訊載入
-    music.onloadedmetadata = e => {
-      durationTimeDisplay.innerHTML = formatDurationInSec(music.duration);
-    }
+      // 播放中
+      music.ontimeupdate = e => {
+        currentTimeDisplay.innerHTML = formatDurationInSec(music.currentTime);
+        const currentPersent = `${music.currentTime / music.duration * 100}%`;;
+        playBar.style.width = currentPersent;
+      }
+      // 音樂資訊載入
+      music.onloadedmetadata = e => {
+        durationTimeDisplay.innerHTML = formatDurationInSec(music.duration);
+      }
+      // 播放結束後的動作
+      music.onended = e => {
+        // 隨機播放
+        if (playInfo.shuffle) return switchMusic(randomMusicIndex());
+        // 重複播放
+        if (playInfo.currentMusicIndex === playListArray.length - 1 && playInfo.shouldRepeat) {
+          return switchMusic(0);
+        }
+        // 播下一首
+        switchMusic(playInfo.currentMusicIndex + 1);
+      }
+    })()
 
     function setMusicTitle(index) {
       currentMusicTitle.innerHTML = playListArray[index];
@@ -120,56 +148,87 @@
     }
     function fineCurrentMusicInPlayListAndPlay() {
       // 將播放中的項目按鈕變成暫停
-      $(`#music-${currentMusicIndex}`).classList.remove('play');
-      $(`#music-${currentMusicIndex}`).classList.add('pause');
+      $(`#music-${playInfo.currentMusicIndex}`).classList.remove('play');
+      $(`#music-${playInfo.currentMusicIndex}`).classList.add('pause');
     }
     function updateCurrentMusic(index) {
       setMusicTitle(index);
       resetPlayList();
       fineCurrentMusicInPlayListAndPlay();
     }
-    // 控制播放＆暫停
-    function playOrPause() {
-      if (music.paused) {
-        music.play();
-        fineCurrentMusicInPlayListAndPlay();
+    function setMainPlayPause(stat) {
+      if (stat === 'play') {
         playButtonGroup.classList.remove('pause');
         playButtonGroup.classList.add('play');
       } else {
-        resetPlayList();
-        music.pause();
         playButtonGroup.classList.remove('play');
         playButtonGroup.classList.add('pause');
       }
     }
+    function playMusic() {
+      music.play();
+      fineCurrentMusicInPlayListAndPlay();
+      setMainPlayPause('play')
+    }
+    // 控制播放＆暫停
+    function playOrPause() {
+      if (music.paused) {
+        playMusic();
+      } else {
+        resetPlayList();
+        music.pause();
+        setMainPlayPause('pause');
+      }
+    }
+    // 播放上一首
     function playPreviousMusic() {
-      const previousMusicIndex = currentMusicIndex - 1 < 0 ? 0 : currentMusicIndex - 1;
+      const previousMusicIndex = playInfo.currentMusicIndex - 1 < 0 ? 0 : playInfo.currentMusicIndex - 1;
       switchMusic(previousMusicIndex);
     }
+    // 播放下一首
     function playNextMusic() {
-      const nextMusicIndex = currentMusicIndex + 1 >= playListArray.length ? playListArray.length - 1 : currentMusicIndex + 1;
+      const nextMusicIndex = playInfo.currentMusicIndex + 1 >= playListArray.length ? playListArray.length - 1 : playInfo.currentMusicIndex + 1;
       switchMusic(nextMusicIndex);
     }
     // 切換歌曲
     function switchMusic(id) {
+      if (id > playListArray.length - 1) {
+        resetPlayList();
+        setMainPlayPause('pause');
+        return;
+      }
       if (music.src.indexOf(`/tracks/${id}`) < 0) {
-        currentMusicIndex = id;
+        playInfo.currentMusicIndex = id;
         music.src = `/tracks/${id}`;
         updateCurrentMusic(id);
       }
-      playOrPause();
+      playMusic();
     }
     // 控制音量
-    // function setVolume(volume) {
-    //   music.volume = volume;
-    // }
-
+    function setVolume(volume) {
+      music.volume = volume;
+    }
+    // 移動時間軸
     $('.progress-bar').addEventListener('click', e => {
       const targetPersent = e.offsetX / e.target.offsetWidth;
       const targetSec = parseInt(targetPersent * music.duration);
       music.currentTime = targetSec;
     })
+    // 重複播放歌曲列表
+    function repeat(e) {
+      e.classList.toggle('active');
+      playInfo.shouldRepeat = !playInfo.shouldRepeat;
+    }
+    // 隨機播放下一首歌
+    function shuffle(e) {
+      e.classList.toggle('active');
+      playInfo.shuffle = !playInfo.shuffle;
+    }
 
+
+    function randomMusicIndex() {
+      return parseInt(Math.random() * playListArray.length);
+    }
     function formatDurationInSec(sec) {
       return moment.utc(moment.duration(sec, 'seconds').as('milliseconds')).format('mm:ss');
     }
