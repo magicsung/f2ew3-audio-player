@@ -12,12 +12,12 @@
 </head>
 
 <body>
-  <audio controls="controls" id="audio_player">
-    <source src="/tracks/1" type="audio/mpeg" />
+  <audio controls="controls" id="music">
+    <source src="/tracks/0" type="audio/mpeg" />
     Your browser does not support the audio element.
   </audio>
 
-  <div id="audioplayer" style="border: 1px solid black">
+  <div id="audio-player" style="border: 1px solid black">
     <div class="jp-type-single">
       <div class="jp-title">
         <ul>
@@ -26,16 +26,18 @@
             <img class="cover-image" src="/img/Cover.png" alt="" />
             <div class="black-mask"></div>
           </li>
-          <li class="title mt-25 mb-25 fz-1p2em">Title
-            <ul class="music-controls pause" id="play-button-group" onclick="playOrPause()">
-              <li><a class="play-button fas fa-play" tabindex="1"></a></li>
-              <li><a class="pause-button fas fa-pause" tabindex="1"></a></li>
-            </ul>
+          <li class="title mt-25 fz-1p2em">
+            <span id="music-title">Title</span>
+            <div class="music-controls pause" id="play-button-group">
+              <span><a class="fa fa-step-backward mr-15 clickable" onclick="playPreviousMusic()"></a></span>
+              <span><a class="play-button fa fa-play clickable" onclick="playOrPause()"></a></span>
+              <span><a class="pause-button fa fa-pause clickable" onclick="playOrPause()"></a></span>
+              <span><a class="fa fa-step-forward ml-15 clickable" onclick="playNextMusic()"></a></span>
+            </div>
           </li>
         </ul>
       </div>
-      <div class="jp-gui jp-interface">
-
+      <div class="panel">
         <div class="time-holder">
           <div class="current-time">00:00</div>
           <div class="duration" role="timer" aria-label="duration">00:00</div>
@@ -48,20 +50,52 @@
     </div>
   </div>
 
+  <div id="play-list">
+    <ol></ol>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
   <script>
-    const music = document.getElementById('audio_player');
-    const playButtonGroup = document.getElementById('play-button-group');
-    const currentTimeDisplay = document.querySelector('.current-time');
-    const durationTimeDisplay = document.querySelector('.duration');
-    const bufferedBar = document.querySelector('.buffered-bar');
-    const playBar = document.querySelector('.play-bar');
+    const $ = document.querySelector.bind(document);
+    const $$ = document.querySelectorAll.bind(document);
+    const music = $('#music');
+    const currentMusicTitle = $('#music-title');
+    const playButtonGroup = $('#play-button-group');
+    const currentTimeDisplay = $('.current-time');
+    const durationTimeDisplay = $('.duration');
+    const bufferedBar = $('.buffered-bar');
+    const playBar = $('.play-bar');
+    const playList = $('#play-list');
+    const playListArray = [];
+    let currentMusicIndex = 0;
+
+    // 取得音樂列表
+    axios.get('/tracks').then(function (res) {
+      playListArray.push(...res.data);
+      // 將音樂顯示在play-list
+      const listTemplate = res.data.map((item, index) => {
+        const playPauseButton = `
+          <span class="music-list-item play pull-right" id="music-${index}">
+            <span class="fa fa-play clickable" onclick="switchMusic(${index})"></span>
+            <span class="fa fa-pause clickable" onclick="playOrPause()"></span>
+          </span>
+        `;
+        return `<li>${index + 1}. ${item} ${playPauseButton}</li>`
+      });
+      playList.firstElementChild.innerHTML = listTemplate.join('');
+      setMusicTitle(0);
+    });
 
     // 下載進度
     music.onprogress = e => {
-      const buffered = music.buffered.end(music.buffered.length - 1);
-      const bufferedPersent = `${buffered / music.duration * 100}%`;
-      bufferedBar.style.width = bufferedPersent;
+      try {
+        const buffered = music.buffered.end(music.buffered.length - 1);
+        const bufferedPersent = `${buffered / music.duration * 100}%`;
+        bufferedBar.style.width = bufferedPersent; 
+      } catch (error) {
+        console.log(error);
+      }
     }
     // 播放中
     music.ontimeupdate = e => {
@@ -74,22 +108,67 @@
       durationTimeDisplay.innerHTML = formatDurationInSec(music.duration);
     }
 
+    function setMusicTitle(index) {
+      currentMusicTitle.innerHTML = playListArray[index];
+    }
+    // 將列表中的所有項目重置
+    function resetPlayList() {
+      $$('.music-list-item').forEach(item => {
+        item.classList.remove('pause');
+        item.classList.add('play');
+      })
+    }
+    function fineCurrentMusicInPlayListAndPlay() {
+      // 將播放中的項目按鈕變成暫停
+      $(`#music-${currentMusicIndex}`).classList.remove('play');
+      $(`#music-${currentMusicIndex}`).classList.add('pause');
+    }
+    function updateCurrentMusic(index) {
+      setMusicTitle(index);
+      resetPlayList();
+      fineCurrentMusicInPlayListAndPlay();
+    }
     // 控制播放＆暫停
     function playOrPause() {
       if (music.paused) {
         music.play();
+        fineCurrentMusicInPlayListAndPlay();
         playButtonGroup.classList.remove('pause');
         playButtonGroup.classList.add('play');
       } else {
+        resetPlayList();
         music.pause();
         playButtonGroup.classList.remove('play');
         playButtonGroup.classList.add('pause');
       }
     }
-    // 控制音量
-    function setVolume(volume) {
-      music.volume = volume;
+    function playPreviousMusic() {
+      const previousMusicIndex = currentMusicIndex - 1 < 0 ? 0 : currentMusicIndex - 1;
+      switchMusic(previousMusicIndex);
     }
+    function playNextMusic() {
+      const nextMusicIndex = currentMusicIndex + 1 >= playListArray.length ? playListArray.length - 1 : currentMusicIndex + 1;
+      switchMusic(nextMusicIndex);
+    }
+    // 切換歌曲
+    function switchMusic(id) {
+      if (music.src.indexOf(`/tracks/${id}`) < 0) {
+        currentMusicIndex = id;
+        music.src = `/tracks/${id}`;
+        updateCurrentMusic(id);
+      }
+      playOrPause();
+    }
+    // 控制音量
+    // function setVolume(volume) {
+    //   music.volume = volume;
+    // }
+
+    $('.progress-bar').addEventListener('click', e => {
+      const targetPersent = e.offsetX / e.target.offsetWidth;
+      const targetSec = parseInt(targetPersent * music.duration);
+      music.currentTime = targetSec;
+    })
 
     function formatDurationInSec(sec) {
       return moment.utc(moment.duration(sec, 'seconds').as('milliseconds')).format('mm:ss');

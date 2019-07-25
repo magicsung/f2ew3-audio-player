@@ -5,17 +5,24 @@ body { background-color: #eee; }
 .pd-15 { padding: 15px; }
 .mb-25 { margin-bottom: 25px; }
 .mb-45 { margin-bottom: 45px; }
+.ml-15 { margin-left: 15px; }
+.mr-15 { margin-right: 15px; }
 .fz-1p2em { font-size: 1.2em; }
+.pull-right { float: right; }
 
-#audio_player {
+#music {
   /* display: none; */
 }
 
-#audioplayer {
+html, body {
+  position: relative;
+}
+
+#audio-player {
   width: 420px;
   max-width: 100%;
   position: absolute;
-  left: 50%;
+  left: 25%;
   top: 50%;
   transform: translate( -50%, -50% );
   background-color: #000;
@@ -23,11 +30,35 @@ body { background-color: #eee; }
   border-radius: 10px;
 }
 @media screen and (max-width: 420px) {
-  #audioplayer {
+  #audio-player {
     left: 0;
     top: 0;
     transform: translate( 0, 0 );
   }
+}
+
+#play-list {
+  max-width: 100%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate( 0, -50% );
+  width: 420px;
+  height: 575px;
+  background-color: #000;
+  box-shadow: 0 20px 20px 0 #666;
+  border-radius: 10px;
+  color: #fff;
+}
+
+#play-list ol {
+  list-style: none;
+  padding: 10px;
+}
+
+#play-list ol li {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
 }
 
 
@@ -79,9 +110,16 @@ body { background-color: #eee; }
   font-size: 2em;
   color: #fff;
   font-weight: 700;
-  margin-left: 25px;
+  text-align: center;
   position: relative;
   top: -50px;
+}
+
+#music-title {
+  overflow: hidden;
+  width: calc(100% - 50px);
+  text-overflow: ellipsis;
+  display: inline-block;
 }
 
 .jp-title ul {
@@ -90,7 +128,7 @@ body { background-color: #eee; }
   list-style: none;
 }
 
-.jp-gui {
+.panel {
 	background: #000;
 	/*overflow: hidden;*/
   height: 60px;
@@ -108,9 +146,8 @@ body { background-color: #eee; }
 
 .music-controls {
   position: relative;
-  float: right;
+  text-align: center;
   top: 5px;
-  right: 25px;
   padding: 0;
   margin: 0;
   list-style: none;
@@ -188,7 +225,7 @@ body { background-color: #eee; }
   overflow: hidden;
   position: relative;
   top: 0;
-  height: 3px;
+  height: 5px;
   width: calc( 100% - 50px );
   margin: 0 25px;
   -webkit-box-shadow: 0 1px 1px 0 rgba(0,0,0,0.2) inset;
@@ -199,7 +236,7 @@ body { background-color: #eee; }
   position: absolute;
   top: 0;
   left: 0;
-  height: 3px;
+  height: 5px;
   width: 0;
   background-color: rgba(0,0,0,.5);
   border-radius: 3px 3px 3px 3px;
@@ -209,7 +246,7 @@ body { background-color: #eee; }
   position: absolute;
   top: 0;
   left: 0;
-  height: 3px;
+  height: 5px;
   width: 0;
   background-color: #feffbd;
   opacity: 0.5;
@@ -233,4 +270,15 @@ body { background-color: #eee; }
 .time-holder .duration {
   float: right;
   color: rgba(255, 255, 255, 0.3);
+}
+
+
+.clickable {
+  cursor: pointer;
+} 
+.music-list-item.play .fa-pause{
+  display: none;
+}
+.music-list-item.pause .fa-play{
+  display: none;
 }
